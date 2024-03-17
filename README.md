@@ -1,22 +1,22 @@
 # Newton In The Maze
-Un hot i-a furat merele lui Newton si le-a ascuns intr-un labirint. Rolul tau este sa-l ajuti pe Newton sa-si recupereze merele.
+Un hoț i-a furat merele lui Newton și le-a ascuns într-un labirint. Rolul tău este să-l ajuți pe Newton să-și recupereze merele.
 
-### Cum se joaca?
-Personajul pe care il poti controla este marcat cu litera T. Trebuie sa colectezi obiectele marcate cu culoarea rosu (merele) si dupa sa 
-te duci spre iesirea din labirint (va fi marcata cu verde in momentul in care toate merele au fost adunate). Uneori hotul a pus merele
-in locuri imposibil de accesat. In aceasta situatie poti lua o bomba (obiectul de culoare albastra plasat deasupra labirintului) si sa
-o detonezi la pozitia la care te afli (ce va fi in jurul caracterului va fi distrus). Poti lua o bomba chiar daca nu ai nevoie de ea. Atunci
-cand iei o bomba se va genera alta noua peste 5 secunde (bomba se pastreaza chiar daca a fost una noua generata).  
+### Cum se joacă?
+Personajul pe care îl poți controla este marcat cu litera T. Trebuie să colectezi obiectele marcate cu roșu (merele) și după să 
+te duci spre ieșirea din labirint (va fi marcată cu verde în momentul în care toate merele au fost adunate). Uneori hoțul a pus merele
+în locuri imposibil de accesat. În această situație poți lua o bombă (obiectul albastru plasat deasupra labirintului) și să
+o detonezi la poziția la care te afli (ce va fi în jurul caracterului va fi distrus). Poți lua o bombă chiar dacă nu ai nevoie de ea. Atunci
+când iei o bombă se va genera alta noua peste 5 secunde (bomba se păstrează chiar dacă a fost una nouă generată).  
 
 
 ### Dimensiunea labirintului
-Initial programul cere un numar care reprezinta dimensiunea labirintului. Acesta poate fi cuprins intre 10 sau 30 din cauza limitarilor
+Inițial programul cere un numar care reprezintă dimensiunea labirintului. Acesta poate fi cuprins între 10 sau 30 din cauza limitărilor
 de rendering.
 
 ### Controale
-Space - iei un obiect (trebuie sa fi pus pe obiect ca sa-l poti lua)
-W, A, S, D - te misti sus, stanga, jos, dreapta
-F - arunci o bomba care va sparge cei 8 vecini din jurul tau
+Space - iei un obiect (trebuie să fi deasupra obiectului ca să-l poți lua)
+W, A, S, D - te miști sus, stânga, jos, dreapta
+F - arunci o bombă care va sparge cei 8 vecini din jurul tău
 
 ### Important!
 Aveți voie cu cod generat de modele de limbaj la care nu ați contribuit semnificativ doar în folder-ul `generated`.
