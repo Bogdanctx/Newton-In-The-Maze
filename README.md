@@ -1,4 +1,22 @@
-# Nu primesc notă pentru că nu am pus titlu și descriere
+# Newton In The Maze
+Un hot i-a furat merele lui Newton si le-a ascuns intr-un labirint. Rolul tau este sa-l ajuti pe Newton sa-si recupereze merele.
+
+### Cum se joaca?
+Personajul pe care il poti controla este marcat cu litera T. Trebuie sa colectezi obiectele marcate cu culoarea rosu (merele) si dupa sa 
+te duci spre iesirea din labirint (va fi marcata cu verde in momentul in care toate merele au fost adunate). Uneori hotul a pus merele
+in locuri imposibil de accesat. In aceasta situatie poti lua o bomba (obiectul de culoare albastra plasat deasupra labirintului) si sa
+o detonezi la pozitia la care te afli (ce va fi in jurul caracterului va fi distrus). Poti lua o bomba chiar daca nu ai nevoie de ea. Atunci
+cand iei o bomba se va genera alta noua peste 5 secunde (bomba se pastreaza chiar daca a fost una noua generata).  
+
+
+### Dimensiunea labirintului
+Initial programul cere un numar care reprezinta dimensiunea labirintului. Acesta poate fi cuprins intre 10 sau 30 din cauza limitarilor
+de rendering.
+
+### Controale
+Space - iei un obiect (trebuie sa fi pus pe obiect ca sa-l poti lua)
+W, A, S, D - te misti sus, stanga, jos, dreapta
+F - arunci o bomba care va sparge cei 8 vecini din jurul tau
 
 ### Important!
 Aveți voie cu cod generat de modele de limbaj la care nu ați contribuit semnificativ doar în folder-ul `generated`.
