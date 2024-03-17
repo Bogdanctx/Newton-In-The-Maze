@@ -2,6 +2,7 @@
 #include <vector>
 #include <random>
 #include <chrono>
+#include <climits>
 
 #include "rlutil.h"
 
@@ -19,7 +20,7 @@ public:
 
     ~Object() = default;
 
-    friend std::ostream &operator<<(std::ostream &out, Object &object);
+    friend std::ostream &operator<<(std::ostream &out, const Object &object);
 
     std::pair<int, int> getPosition();
 
@@ -27,7 +28,7 @@ private:
     int m_crtRow, m_crtCol, m_color;
 };
 
-std::ostream &operator<<(std::ostream &out, Object &object) {
+std::ostream &operator<<(std::ostream &out, const Object &object) {
     rlutil::setColor(object.m_color);
     gotoxy(object.m_crtCol + 1, object.m_crtRow + 1);
     out << 'O';
@@ -57,14 +58,12 @@ class Maze {
 public:
     explicit Maze(const int &dim) : m_maze(std::vector<std::vector<char>>(dim, std::vector<char>(dim, '#'))),
                                     m_dim(dim) {};
-
     ~Maze() = default;
 
-    friend std::ostream &operator<<(std::ostream &os, Maze &maze);
+    friend std::ostream &operator<<(std::ostream &out, const Maze &maze);
 
     bool isPositionAvailable(const int &row, const int &col);
     void generate();
-
     void createHole(const int &row, const int &col);
 
     std::vector<std::pair<int, int>> getFreeCells();
@@ -75,14 +74,14 @@ private:
     const int m_dim;
 };
 
-std::ostream &operator<<(std::ostream &os, Maze &maze) {
+std::ostream &operator<<(std::ostream &out, const Maze &maze) {
     for (const auto &i: maze.m_maze) {
         for (const auto &j: i) {
-            os << j;
+            out << j;
         }
-        os << '\n';
+        out << '\n';
     }
-    return os;
+    return out;
 }
 
 bool Maze::isInside(const int &row, const int &col) const {
@@ -99,7 +98,7 @@ void Maze::createHole(const int &row, const int &col) {
                             {1,  -1},
                             {0,  -1}};
 
-    for (const auto d: drdc) {
+    for (const auto &d: drdc) {
         const int newRow = row + d[0];
         const int newCol = col + d[1];
         if (isInside(newRow, newCol) && m_maze[newRow][newCol] == '#') {
@@ -172,33 +171,34 @@ void Maze::generate() {
 class Player {
 public:
     Player() : m_crtRow(0), m_crtCol(0), m_hasBomb(false) {};
-
     ~Player() = default;
 
     void setHasBomb(bool val);
-
     [[nodiscard]] bool getHasBomb() const;
-
-    void setNewPosition(const int &newRow, const int &newCol);
-
     std::pair<int, int> getPosition();
 
-    friend std::ostream &operator<<(std::ostream &os, Player &player);
+    friend std::ostream &operator<<(std::ostream &out, const Player &player);
+    Player& operator=(const std::pair<int, int> &pos);
 
 private:
     int m_crtRow, m_crtCol;
     bool m_hasBomb;
 };
 
-std::ostream &operator<<(std::ostream &os, Player &player) {
+Player &Player::operator=(const std::pair<int, int> &pos) {
+    m_crtRow = pos.first;
+    m_crtCol = pos.second;
+    return *this;
+}
+
+std::ostream& operator<<(std::ostream &out, const Player &player) {
     rlutil::setColor(rlutil::BROWN);
 
     gotoxy(player.m_crtCol + 1, player.m_crtRow + 1);
-    os << 'T';
-    os.flush();
+    out << 'T';
     rlutil::setColor(rlutil::WHITE);
 
-    return os;
+    return out;
 }
 
 void Player::setHasBomb(const bool val) {
@@ -207,11 +207,6 @@ void Player::setHasBomb(const bool val) {
 
 bool Player::getHasBomb() const {
     return m_hasBomb;
-}
-
-void Player::setNewPosition(const int &newRow, const int &newCol) {
-    m_crtRow = newRow;
-    m_crtCol = newCol;
 }
 
 std::pair<int, int> Player::getPosition() {
@@ -234,16 +229,14 @@ std::pair<int, int> Player::getPosition() {
 
 class Game {
 public:
-    explicit Game(const int &maze_size) : m_maze(maze_size), bomb(Object{0, random(maze_size - 1, 2), rlutil::BLACK}),
+    explicit Game(const int &maze_size) : m_maze(maze_size), bomb{0, random(maze_size - 1, 2), rlutil::CYAN},
                                           m_mazeSize(maze_size), m_isRunning(true), m_toggleRender(true) {};
-
     ~Game() = default;
 
     void run();
 
 private:
     void handleEvent(bool &renderFlag);
-
     void render();
 
     Maze m_maze;
@@ -264,9 +257,9 @@ void Game::run() {
     const int numberOfRandomObjects = random(10, 3) + 1;
 
     for (int i = 0; i < numberOfRandomObjects; i++) {
-        const int randIndex = random(static_cast<int>(mazeFreeCells.size()));
-        std::pair<int, int> randomPos = mazeFreeCells[randIndex];
-        Object obj{randomPos.first, randomPos.second};
+        const int randIndex = random(static_cast<int>(mazeFreeCells.size()), 2);
+        const std::pair<int, int> randomPos = mazeFreeCells[randIndex];
+        const Object obj{randomPos.first, randomPos.second};
         objects.push_back(obj);
     }
 
@@ -284,7 +277,7 @@ void Game::run() {
                     elapsedTime - clock).count());
 
             if (duration >= 5) {
-                const Object newBomb = Object{0, random(m_mazeSize - 3) + 1, rlutil::BLACK};
+                const Object newBomb = Object{0, random(m_mazeSize - 3) + 2, rlutil::CYAN};
                 bomb = newBomb;
                 m_toggleRender = true;
             }
@@ -319,6 +312,7 @@ void Game::render() {
     }
 
     std::cout << m_player;
+    std::cout.flush();
 }
 
 void Game::handleEvent(bool &renderFlag) {
@@ -367,7 +361,7 @@ void Game::handleEvent(bool &renderFlag) {
         case 119: // w
         case 87: { // W
             if (m_maze.isPositionAvailable(crtRow - 1, crtCol)) {
-                m_player.setNewPosition(crtRow - 1, crtCol);
+                m_player = std::make_pair(crtRow - 1, crtCol);
             }
 
             renderFlag = true;
@@ -376,7 +370,7 @@ void Game::handleEvent(bool &renderFlag) {
         case 97: // a
         case 65: { // A
             if (m_maze.isPositionAvailable(crtRow, crtCol - 1)) {
-                m_player.setNewPosition(crtRow, crtCol - 1);
+                m_player = std::make_pair(crtRow, crtCol - 1);
             }
 
             renderFlag = true;
@@ -385,7 +379,7 @@ void Game::handleEvent(bool &renderFlag) {
         case 115: // s
         case 83: { // S
             if (m_maze.isPositionAvailable(crtRow + 1, crtCol)) {
-                m_player.setNewPosition(crtRow + 1, crtCol);
+                m_player = std::make_pair(crtRow + 1, crtCol);
             }
 
             renderFlag = true;
@@ -394,7 +388,7 @@ void Game::handleEvent(bool &renderFlag) {
         case 100: // d
         case 68: { // D
             if (m_maze.isPositionAvailable(crtRow, crtCol + 1)) {
-                m_player.setNewPosition(crtRow, crtCol + 1);
+                m_player = std::make_pair(crtRow, crtCol + 1);
             }
 
             renderFlag = true;
@@ -415,6 +409,7 @@ int main() {
 
     std::cout << "Enter maze size (default=25, min=10, max=35): ";
     std::cin >> dim_maze;
+
     if (dim_maze < 10) {
         dim_maze = 10;
     }
@@ -430,5 +425,6 @@ int main() {
     std::cout << "Newton found all the apples. He may now study the laws of gravity\n";
 
     system("pause");
+
     return 0;
 }
