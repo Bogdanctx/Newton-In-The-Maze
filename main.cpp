@@ -55,16 +55,16 @@ public:
 
     friend std::ostream &operator<<(std::ostream &out, const Maze &maze);
 
-    bool isPositionAvailable(const int &row, const int &col);
-    void generate();
-    void createHole(const int &row, const int &col);
+    bool isPositionAvailable(const int &row, const int &col); // verifica daca o noua pozitie este buna
+    void generate(); // genereaza un labirint
+    void createHole(const int &row, const int &col); // distruge cei 8 vecini din jurul jucatorului cand a folosit bomba
 
-    std::vector<std::pair<int, int>> getFreeCells();
+    std::vector<std::pair<int, int>> getFreeCells(); // cauta toate locurile libere din labirint
 
 private:
-    [[nodiscard]] bool isInside(const int &row, const int &col) const;
-    std::vector<std::vector<char>> m_maze;
-    const int m_dim;
+    [[nodiscard]] bool isInside(const int &row, const int &col) const; // verifica daca coordonatele sunt in interiorul labirintului
+    std::vector<std::vector<char>> m_maze; // labirintul
+    const int m_dim; // dimensiunea labirintului
 };
 
 std::ostream &operator<<(std::ostream &out, const Maze &maze) {
@@ -81,7 +81,7 @@ bool Maze::isInside(const int &row, const int &col) const {
     return row >= 0 && col >= 0 && row < m_dim && col < m_dim;
 }
 
-void Maze::createHole(const int &row, const int &col) {
+void Maze::createHole(const int &row, const int &col) { // cand a fost bomba folosita se distrug cei 8 vecini din jurul jucatorului
     const int drdc[8][2] = {{-1, -1},
                             {-1, 0},
                             {-1, 1},
@@ -100,7 +100,7 @@ void Maze::createHole(const int &row, const int &col) {
     }
 }
 
-std::vector<std::pair<int, int>> Maze::getFreeCells() {
+std::vector<std::pair<int, int>> Maze::getFreeCells() { // cauta toate locurile libere din labirint
     std::vector<std::pair<int, int>> result;
     for (int row = 1; row < m_dim; row++) {
         for (int col = 0; col < m_dim; col++)
@@ -115,7 +115,7 @@ bool Maze::isPositionAvailable(const int &row, const int &col) {
     return isInside(row, col) && m_maze[row][col] != '#';
 }
 
-void Maze::generate() {
+void Maze::generate() { // Pentru generarea labirintului a fost folosit algoritmul Sidewinder
     for (int col = 0; col < m_dim; col++) {
         m_maze[0][col] = ' ';
     }
@@ -125,18 +125,19 @@ void Maze::generate() {
             m_maze[row][col] = ' ';
             run.emplace_back(row, col);
 
-            bool carve_east = effolkronium::random_static::get(0, 100) > 30;
+            bool carve_east = effolkronium::random_static::get(0, 100) > 30; // daca continui sa sap la dreapta
 
             if (carve_east && col + 1 < m_dim) {
                 m_maze[row][col + 1] = ' ';
-            } else {
+            }
+            else { // sap in sus
                 std::pair<int, int> randomCell = run[effolkronium::random_static::get(0, (int)run.size()-1)];
                 m_maze[randomCell.first - 1][randomCell.second] = ' ';
                 if (randomCell.first + 1 < m_dim) {
                     m_maze[randomCell.first + 1][randomCell.second] = ' ';
                 }
                 run.erase(run.begin(), run.end());
-                col++;
+                ++col;
             }
         }
     }
@@ -174,7 +175,7 @@ public:
     Player& operator=(const std::pair<int, int> &pos);
 
 private:
-    int m_crtRow, m_crtCol;
+    int m_crtRow, m_crtCol; // pozitia curenta a jucatorului
     bool m_hasBomb;
 };
 
@@ -239,17 +240,17 @@ private:
     std::chrono::system_clock::time_point clock;
 
     const int m_mazeSize;
-    bool m_isRunning;
-    bool m_toggleRender;
+    bool m_isRunning; // flag pentru a mentine rularea jocului
+    bool m_toggleRender; // flag ca sa fac render doar atunci cand s-a intamplat ceva
 };
 
 void Game::run() {
-    rlutil::setBackgroundColor(rlutil::DARKGREY);
     m_maze.generate();
+
     const std::vector<std::pair<int, int>> mazeFreeCells = m_maze.getFreeCells();
     const int numberOfRandomObjects = effolkronium::random_static::get(3, 10);
 
-    for (int i = 0; i < numberOfRandomObjects; i++) {
+    for (int i = 0; i < numberOfRandomObjects; i++) { // aici generez obiecte (mere) random in labirint
         const int randIndex = effolkronium::random_static::get(0, (int) mazeFreeCells.size() - 1);
         const std::pair<int, int> randomPos = mazeFreeCells[randIndex];
         const Object obj{randomPos.first, randomPos.second};
@@ -264,11 +265,13 @@ void Game::run() {
             m_toggleRender = false;
         }
 
-        if (bomb.getPosition().second == m_mazeSize - 1) {
+        if (bomb.getPosition().second == m_mazeSize - 1) { // atunci cand o bomba a fost luata noua pozitie va fi in dreapta
+            // conditia de sus verifica daca bomba a fost luata in functie de pozitia bombei
+
             const std::chrono::system_clock::time_point elapsedTime = std::chrono::system_clock::now();
             const int duration = (int) std::chrono::duration_cast<std::chrono::seconds>(elapsedTime - clock).count();
 
-            if (duration >= 5) {
+            if (duration >= 5) { // daca au trecut 5 secunde de cand bomba a fost luata atunci generez una noua
                 const Object newBomb = Object{0, effolkronium::random_static::get(2, m_mazeSize - 2), rlutil::CYAN};
                 bomb = newBomb;
                 m_toggleRender = true;
@@ -285,8 +288,6 @@ void Game::run() {
     else {
         std::cout << "Newton couldn't find its apples.\n";
     }
-
-    rlutil::setBackgroundColor(rlutil::BLACK);
 }
 
 void Game::render() {
@@ -294,21 +295,21 @@ void Game::render() {
 
     std::cout << m_maze;
 
+    // aici marchez iesirea din labirint
     const int objectsRemained = (int) objects.size();
+    gotoxy(1, 1);
     if (objectsRemained != 0) {
-        gotoxy(1, 1);
         rlutil::setColor(rlutil::LIGHTRED);
         std::cout << ">>";
-        rlutil::setColor(rlutil::WHITE);
     } else {
         gotoxy(1, 1);
         rlutil::setColor(rlutil::LIGHTGREEN);
         std::cout << "<<";
-        rlutil::setColor(rlutil::WHITE);
     }
+    rlutil::setColor(rlutil::WHITE);
 
     std::cout << bomb;
-    for (Object &obj: objects) {
+    for (Object &obj: objects) { // afisez merele pe ecran
         std::cout << obj;
     }
 
@@ -329,19 +330,21 @@ void Game::handleEvent(bool &renderFlag) {
 
     switch (std::tolower(key_pressed)) {
         case rlutil::KEY_SPACE: {
-            std::erase_if(objects, [&](Object item) {
-                const std::pair<int, int> objPosition = item.getPosition();
-                return playerPosition == objPosition;
-            });
+            objects.erase(
+            std::remove_if(objects.begin(), objects.end(), [&](Object item) {
+                    const std::pair<int, int> objPosition = item.getPosition();
+                    return playerPosition == objPosition;
+            }), objects.end()); // daca jucatorul se afla pe un obiect inseamna ca a luat obiectul => il sterg din vector
 
             std::pair<int, int> bombPosition = bomb.getPosition();
 
-            if (playerPosition == bombPosition && bombPosition.second != m_mazeSize - 1) {
+            if (playerPosition == bombPosition && bombPosition.second != m_mazeSize - 1) { // daca jucatorul a luat bomba
+                // si bomba a fost generata
                 m_player.setHasBomb(true);
                 const Object offBomb{0, m_mazeSize - 1, rlutil::LIGHTGREEN};
                 bomb = offBomb;
 
-                clock = std::chrono::system_clock::now();
+                clock = std::chrono::system_clock::now(); // cronometrez cat timp a trecut de cand bomba a fost luata
             }
 
             renderFlag = true;
@@ -350,7 +353,7 @@ void Game::handleEvent(bool &renderFlag) {
         }
 
         case 102: { // f
-            if (m_player.getHasBomb()) {
+            if (m_player.getHasBomb()) { // jucatorul vrea sa foloseasca bomba
                 m_maze.createHole(crtRow, crtCol);
                 m_player.setHasBomb(false);
             }
