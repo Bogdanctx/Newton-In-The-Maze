@@ -238,6 +238,8 @@ private:
     Object bomb;
     std::vector<Object> objects;
     std::chrono::system_clock::time_point clock;
+    std::chrono::system_clock::time_point gameStarted;
+    std::chrono::system_clock::time_point lastRender;
 
     const int m_mazeSize;
     bool m_isRunning; // flag pentru a mentine rularea jocului
@@ -246,6 +248,7 @@ private:
 
 void Game::run() {
     m_maze.generate();
+    gameStarted = std::chrono::system_clock::now();
 
     const std::vector<std::pair<int, int>> mazeFreeCells = m_maze.getFreeCells();
     const int numberOfRandomObjects = effolkronium::random_static::get(3, 10);
@@ -258,20 +261,30 @@ void Game::run() {
     }
 
     while (m_isRunning) {
+        const std::chrono::system_clock::time_point currentTime = std::chrono::system_clock::now();
+        const int minutesPassed = (int) std::chrono::duration_cast<std::chrono::minutes>(currentTime - gameStarted).count();
+        const int renderInterval = (int) std::chrono::duration_cast<std::chrono::minutes>(currentTime - lastRender).count();
+
+        if(minutesPassed >= 5) { // au trecut 5 minute de joc -> opresc jocul
+            m_isRunning = false;
+            continue;
+        }
+        if(renderInterval >= 1) { // pentru a actualiza textul legat de time remaining
+            m_toggleRender = true;
+        }
+
         handleEvent(m_toggleRender);
 
         if (m_toggleRender) {
             render();
             m_toggleRender = false;
+            lastRender = std::chrono::system_clock::now();
         }
 
         if (bomb.getPosition().second == m_mazeSize - 1) { // atunci cand o bomba a fost luata noua pozitie va fi in dreapta
             // conditia de sus verifica daca bomba a fost luata in functie de pozitia bombei
-
-            const std::chrono::system_clock::time_point elapsedTime = std::chrono::system_clock::now();
-            const int duration = (int) std::chrono::duration_cast<std::chrono::seconds>(elapsedTime - clock).count();
-
-            if (duration >= 5) { // daca au trecut 5 secunde de cand bomba a fost luata atunci generez una noua
+            const int secondsPassed = (int) std::chrono::duration_cast<std::chrono::seconds >(currentTime - clock).count();
+            if (secondsPassed >= 5) { // daca au trecut 5 secunde de cand bomba a fost luata atunci generez una noua
                 const Object newBomb = Object{0, effolkronium::random_static::get(2, m_mazeSize - 2), rlutil::CYAN};
                 bomb = newBomb;
                 m_toggleRender = true;
@@ -283,7 +296,7 @@ void Game::run() {
     rlutil::cls();
 
     if(objects.empty()) {
-        std::cout << "Newton find its apples. He may now study the laws of gravity.\n";
+        std::cout << "Newton found its apples. He may now study the laws of gravity.\n";
     }
     else {
         std::cout << "Newton couldn't find its apples.\n";
@@ -295,18 +308,25 @@ void Game::render() {
 
     std::cout << m_maze;
 
+    const std::chrono::system_clock::time_point currentTime = std::chrono::system_clock::now();
+    const int minutesPassed = (int) std::chrono::duration_cast<std::chrono::minutes>(currentTime - gameStarted).count();
+
+    std::cout<<"\nTime remaining: " << 5-minutesPassed << " minutes left.";
+
     // aici marchez iesirea din labirint
     const int objectsRemained = (int) objects.size();
-    gotoxy(1, 1);
     if (objectsRemained != 0) {
+        gotoxy(1, 1);
         rlutil::setColor(rlutil::LIGHTRED);
         std::cout << ">>";
-    } else {
+        rlutil::setColor(rlutil::WHITE);
+    }
+    else {
         gotoxy(1, 1);
         rlutil::setColor(rlutil::LIGHTGREEN);
         std::cout << "<<";
+        rlutil::setColor(rlutil::WHITE);
     }
-    rlutil::setColor(rlutil::WHITE);
 
     std::cout << bomb;
     for (Object &obj: objects) { // afisez merele pe ecran
@@ -330,11 +350,10 @@ void Game::handleEvent(bool &renderFlag) {
 
     switch (std::tolower(key_pressed)) {
         case rlutil::KEY_SPACE: {
-            objects.erase(
-            std::remove_if(objects.begin(), objects.end(), [&](Object item) {
-                    const std::pair<int, int> objPosition = item.getPosition();
-                    return playerPosition == objPosition;
-            }), objects.end()); // daca jucatorul se afla pe un obiect inseamna ca a luat obiectul => il sterg din vector
+            std::erase_if(objects, [&](Object item) {
+                const std::pair<int, int> objPosition = item.getPosition();
+                return playerPosition == objPosition;
+            }); // daca jucatorul se afla pe un obiect inseamna ca a luat obiectul => il sterg din vector
 
             std::pair<int, int> bombPosition = bomb.getPosition();
 
