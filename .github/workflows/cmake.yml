@@ -209,6 +209,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install ninja-build
+          # https://github.com/llvm/llvm-project/issues/78354
+          sudo sysctl vm.mmap_rnd_bits=28
 
       # Also see https://github.com/actions/runner-images/discussions/9446#discussioncomment-8668538
       - name: Install Clang 17
