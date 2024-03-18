@@ -98,7 +98,7 @@ void Maze::createHole(const int &row, const int &col) {
                             {1,  -1},
                             {0,  -1}};
 
-    for (const auto &d: drdc) {
+    for (const auto &d: drdc) { // cppcheck-suppress constVariable
         const int newRow = row + d[0];
         const int newCol = col + d[1];
         if (isInside(newRow, newCol) && m_maze[newRow][newCol] == '#') {
