@@ -6,7 +6,7 @@ Personajul pe care îl poți controla este marcat cu litera T. Trebuie să colec
 te duci spre ieșirea din labirint (va fi marcată cu verde în momentul în care toate merele au fost adunate). Uneori hoțul a pus merele
 în locuri imposibil de accesat. În această situație poți lua o bombă (obiectul albastru plasat deasupra labirintului) și să
 o detonezi la poziția la care te afli (ce va fi în jurul caracterului va fi distrus). Poți lua o bombă chiar dacă nu ai nevoie de ea. Atunci
-când iei o bombă se va genera alta noua peste 5 secunde (bomba se păstrează chiar dacă a fost una nouă generată).  
+când iei o bombă se va genera alta nouă peste 5 secunde (bomba se păstrează chiar dacă a fost una nouă generată).  
 
 
 ### Dimensiunea labirintului
@@ -14,9 +14,10 @@ Inițial programul cere un numar care reprezintă dimensiunea labirintului. Aces
 de rendering.
 
 ### Controale
-Space - iei un obiect (trebuie să fi deasupra obiectului ca să-l poți lua)
-W, A, S, D - te miști sus, stânga, jos, dreapta
-F - arunci o bombă care va sparge cei 8 vecini din jurul tău
+Space - iei un obiect (trebuie să te afli peste obiect ca să-l poți lua);<br>
+W, A, S, D - te miști sus, stânga, jos, dreapta;<br>
+F - arunci o bombă care va sparge cei 8 vecini din jurul tău;<br>
+Q - părăsești jocul.
 
 ### Important!
 Aveți voie cu cod generat de modele de limbaj la care nu ați contribuit semnificativ doar în folder-ul `generated`.
@@ -32,22 +33,22 @@ O cerință nu se consideră îndeplinită dacă este realizată doar ca o serie
 
 ### Tema 0
 
-- [ ] Nume proiect (poate fi schimbat ulterior)
-- [ ] Scurtă descriere a temei alese, ce v-ați propus să implementați
+- [ ✔ ] Nume proiect (poate fi schimbat ulterior)
+- [ ✔ ] Scurtă descriere a temei alese, ce v-ați propus să implementați
 
 ## Tema 1
 
 #### Cerințe
-- [ ] definirea a minim **3-4 clase** folosind compunere cu clasele definite de voi
-- [ ] constructori de inițializare
-- [ ] pentru o aceeași (singură) clasă: constructor de copiere, `operator=` de copiere, destructor
+- [ ✔ ] definirea a minim **3-4 clase** folosind compunere cu clasele definite de voi
+- [ ✔ ] constructori de inițializare
+- [ ✔ ] pentru o aceeași (singură) clasă: constructor de copiere, `operator=` de copiere, destructor
 <!-- - [ ] pentru o altă clasă: constructor de mutare, `operator=` de mutare, destructor -->
 <!-- - [ ] pentru o altă clasă: toate cele 5 funcții membru speciale -->
-- [ ] `operator<<` pentru toate clasele pentru afișare (std::ostream)
-- [ ] cât mai multe `const` (unde este cazul)
-- [ ] implementarea a minim 3 funcții membru publice pentru funcționalități specifice temei alese, dintre care cel puțin 1-2 funcții mai complexe
+- [ ✔ ] `operator<<` pentru toate clasele pentru afișare (std::ostream)
+- [ ✔ ] cât mai multe `const` (unde este cazul)
+- [ ✔ ] implementarea a minim 3 funcții membru publice pentru funcționalități specifice temei alese, dintre care cel puțin 1-2 funcții mai complexe
   - nu doar citiri/afișări sau adăugat/șters elemente într-un/dintr-un vector
-- [ ] scenariu de utilizare a claselor definite:
+- [ ✔ ] scenariu de utilizare a claselor definite:
   - crearea de obiecte și apelarea tuturor funcțiilor membru publice în main
   - vor fi adăugate în fișierul `tastatura.txt` DOAR exemple de date de intrare de la tastatură (dacă există); dacă aveți nevoie de date din fișiere, creați alte fișiere separat
 - [ ] tag de `git`: de exemplu `v0.1`

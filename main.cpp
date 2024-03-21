@@ -1,25 +1,33 @@
 #include <iostream>
 #include <vector>
+#include <unordered_set>
 #include <chrono>
 #include <random.hpp>
-
-#include "rlutil.h"
+#include <rlutil.h>
 
 ////////////////////// OBJECT CLASS DEFINITION ////////////////////////////
 
 class Object {
 public:
-    Object(const int &row, const int &col, const int &color = rlutil::LIGHTRED) : m_crtRow(row), m_crtCol(col),
-                                                                                  m_color(color) {}
+    Object(const int row, const int col, const int color = rlutil::LIGHTRED) : m_crtRow(row), m_crtCol(col), m_color(color) {};
+    Object(const Object& obj);
     ~Object() = default;
 
+    Object& operator=(const Object &obj) = default;
     friend std::ostream &operator<<(std::ostream &out, const Object &object);
 
     std::pair<int, int> getPosition();
 
 private:
-    int m_crtRow, m_crtCol, m_color;
+    int m_crtRow, m_crtCol; // coordonatele obiectului
+    int m_color; // culoarea obiectului
 };
+
+Object::Object(const Object& obj) {
+    this->m_crtRow = obj.m_crtRow;
+    this->m_crtCol = obj.m_crtCol;
+    this->m_color = obj.m_color;
+}
 
 std::ostream &operator<<(std::ostream &out, const Object &object) {
     rlutil::setColor(object.m_color);
@@ -49,22 +57,25 @@ std::pair<int, int> Object::getPosition() {
 
 class Maze {
 public:
-    explicit Maze(const int &dim) : m_maze(std::vector<std::vector<char>>(dim, std::vector<char>(dim, '#'))),
+    explicit Maze(const int dim) : m_maze(std::vector<std::vector<char>>(dim, std::vector<char>(dim, '#'))),
                                     m_dim(dim) {};
+    Maze(const Maze &maze) = default;
     ~Maze() = default;
 
+    Maze& operator=(const Maze &maze) = default;
     friend std::ostream &operator<<(std::ostream &out, const Maze &maze);
 
-    bool isPositionAvailable(const int &row, const int &col); // verifica daca o noua pozitie este buna
+    bool isPositionAvailable(int row, int col); // verifica daca o noua pozitie este buna
     void generate(); // genereaza un labirint
-    void createHole(const int &row, const int &col); // distruge cei 8 vecini din jurul jucatorului cand a folosit bomba
+    void createHole(int row, int col); // distruge cei 8 vecini din jurul jucatorului cand a folosit bomba
 
     std::vector<std::pair<int, int>> getFreeCells(); // cauta toate locurile libere din labirint
 
 private:
-    [[nodiscard]] bool isInside(const int &row, const int &col) const; // verifica daca coordonatele sunt in interiorul labirintului
+    [[nodiscard]] bool isInside(int row, int col) const; // verifica daca coordonatele sunt in interiorul labirintului
+
     std::vector<std::vector<char>> m_maze; // labirintul
-    const int m_dim; // dimensiunea labirintului
+    int m_dim{}; // dimensiunea labirintului
 };
 
 std::ostream &operator<<(std::ostream &out, const Maze &maze) {
@@ -77,23 +88,24 @@ std::ostream &operator<<(std::ostream &out, const Maze &maze) {
     return out;
 }
 
-bool Maze::isInside(const int &row, const int &col) const {
+bool Maze::isInside(const int row, const int col) const {
     return row >= 0 && col >= 0 && row < m_dim && col < m_dim;
 }
 
-void Maze::createHole(const int &row, const int &col) { // cand a fost bomba folosita se distrug cei 8 vecini din jurul jucatorului
-    const int drdc[8][2] = {{-1, -1},
-                            {-1, 0},
-                            {-1, 1},
-                            {0,  1},
-                            {1,  1},
-                            {1,  0},
-                            {1,  -1},
-                            {0,  -1}};
+void Maze::createHole(const int row, const int col) { // cand a fost bomba folosita se distrug cei 8 vecini din jurul jucatorului
+    // drdc = cei 8 vecini ai punctului (row, col)
+    const int drdc[8][2] = {{-1, -1}, // (row-1, col-1)
+                            {-1, 0}, // (row-1, col)
+                            {-1, 1}, // (row-1, col+1)
+                            {0,  1}, // (row, col+1)
+                            {1,  1}, // (row+1, col+1)
+                            {1,  0}, // (row+1, col)
+                            {1,  -1}, // (row+1, col - 1)
+                            {0,  -1}}; // (row, col-1)
 
-    for (const auto &d: drdc) { // cppcheck-suppress constVariable
-        const int newRow = row + d[0];
-        const int newCol = col + d[1];
+    for (const auto &direction: drdc) { // cppcheck-suppress constVariable
+        const int newRow = row + direction[0];
+        const int newCol = col + direction[1];
         if (isInside(newRow, newCol) && m_maze[newRow][newCol] == '#') {
             m_maze[newRow][newCol] = ' ';
         }
@@ -111,10 +123,11 @@ std::vector<std::pair<int, int>> Maze::getFreeCells() { // cauta toate locurile 
     return result;
 }
 
-bool Maze::isPositionAvailable(const int &row, const int &col) {
+bool Maze::isPositionAvailable(const int row, const int col) {
     return isInside(row, col) && m_maze[row][col] != '#';
 }
 
+// https://weblog.jamisbuck.org/2011/2/3/maze-generation-sidewinder-algorithm
 void Maze::generate() { // Pentru generarea labirintului a fost folosit algoritmul Sidewinder
     for (int col = 0; col < m_dim; col++) {
         m_maze[0][col] = ' ';
@@ -166,20 +179,22 @@ class Player {
 public:
     Player() : m_crtRow(0), m_crtCol(0), m_hasBomb(false) {};
     ~Player() = default;
+    Player(const Player &player) = default;
+
+    Player& operator=(std::pair<int, int> pos);
+    friend std::ostream &operator<<(std::ostream &out, const Player &player);
+
 
     void setHasBomb(bool val);
     [[nodiscard]] bool getHasBomb() const;
     std::pair<int, int> getPosition();
-
-    friend std::ostream &operator<<(std::ostream &out, const Player &player);
-    Player& operator=(const std::pair<int, int> &pos);
 
 private:
     int m_crtRow, m_crtCol; // pozitia curenta a jucatorului
     bool m_hasBomb;
 };
 
-Player &Player::operator=(const std::pair<int, int> &pos) {
+Player &Player::operator=(const std::pair<int, int> pos) {
     m_crtRow = pos.first;
     m_crtCol = pos.second;
     return *this;
@@ -223,9 +238,10 @@ std::pair<int, int> Player::getPosition() {
 
 class Game {
 public:
-    explicit Game(const int &maze_size) : m_maze(maze_size), bomb{0, effolkronium::random_static::get(2, maze_size - 1), rlutil::CYAN},
+    explicit Game(const int maze_size) : m_maze(maze_size), bomb{0, effolkronium::random_static::get(2, maze_size - 1), rlutil::CYAN},
                                           m_mazeSize(maze_size), m_isRunning(true), m_toggleRender(true) {};
     ~Game() = default;
+    Game(const Game &game) = default;
 
     void run();
 
@@ -241,6 +257,7 @@ private:
     std::chrono::system_clock::time_point gameStarted;
     std::chrono::system_clock::time_point lastRender;
 
+    int m_totalTime{}; // timpul total alocat jocului
     const int m_mazeSize;
     bool m_isRunning; // flag pentru a mentine rularea jocului
     bool m_toggleRender; // flag ca sa fac render doar atunci cand s-a intamplat ceva
@@ -251,22 +268,49 @@ void Game::run() {
     gameStarted = std::chrono::system_clock::now();
 
     const std::vector<std::pair<int, int>> mazeFreeCells = m_maze.getFreeCells();
-    const int numberOfRandomObjects = effolkronium::random_static::get(3, 10);
+
+    int upperLimit = (int) mazeFreeCells.size() / 2;
+    int lowerLimit = 5;
+
+    if(upperLimit < lowerLimit) {
+        std::swap(lowerLimit, upperLimit);
+    }
+
+    int numberOfRandomObjects = effolkronium::random_static::get(lowerLimit, upperLimit);
+    std::unordered_set<int> usedIndex; // marchez indicii folositi pentru a nu avea mai multe obiecte
+    // in aceeasi locatie
+
+    if(numberOfRandomObjects > 60) {
+        numberOfRandomObjects = 60;
+    }
 
     for (int i = 0; i < numberOfRandomObjects; i++) { // aici generez obiecte (mere) random in labirint
         const int randIndex = effolkronium::random_static::get(0, (int) mazeFreeCells.size() - 1);
-        const std::pair<int, int> randomPos = mazeFreeCells[randIndex];
-        const Object obj{randomPos.first, randomPos.second};
-        objects.push_back(obj);
+
+        if(usedIndex.find(randIndex) == usedIndex.end()) { // daca nu am mai folosit indexul randIndex
+            const std::pair<int, int> randomPos = mazeFreeCells[randIndex];
+            const Object obj{randomPos.first, randomPos.second};
+            objects.push_back(obj);
+
+            usedIndex.insert(randIndex);
+        }
+
     }
+
+    m_totalTime = (int) objects.size() / 10;
+    if(m_totalTime == 0) {
+        m_totalTime = 1;
+    }
+    bool timeExpired = false;
 
     while (m_isRunning) {
         const std::chrono::system_clock::time_point currentTime = std::chrono::system_clock::now();
         const int minutesPassed = (int) std::chrono::duration_cast<std::chrono::minutes>(currentTime - gameStarted).count();
         const int renderInterval = (int) std::chrono::duration_cast<std::chrono::minutes>(currentTime - lastRender).count();
 
-        if(minutesPassed >= 5) { // au trecut 5 minute de joc -> opresc jocul
+        if(minutesPassed >= m_totalTime) { // a trecut timpul alocat jocului -> il opresc
             m_isRunning = false;
+            timeExpired = true;
             continue;
         }
         if(renderInterval >= 1) { // pentru a actualiza textul legat de time remaining
@@ -295,8 +339,8 @@ void Game::run() {
 
     rlutil::cls();
 
-    if(objects.empty()) {
-        std::cout << "Newton found its apples. He may now study the laws of gravity.\n";
+    if(objects.empty() && !timeExpired) {
+        std::cout << "Newton found his apples. Now he will study the laws of gravity.\n";
     }
     else {
         std::cout << "Newton couldn't find its apples.\n";
@@ -311,7 +355,19 @@ void Game::render() {
     const std::chrono::system_clock::time_point currentTime = std::chrono::system_clock::now();
     const int minutesPassed = (int) std::chrono::duration_cast<std::chrono::minutes>(currentTime - gameStarted).count();
 
-    std::cout<<"\nTime remaining: " << 5-minutesPassed << " minutes left.";
+    std::cout<<"\nTime remaining: " << m_totalTime - minutesPassed << " minutes left.";
+
+    const int applesLeft = (int) objects.size();
+
+    if(applesLeft == 0) {
+        std::cout<<"\nYou've collected all the apples! The exit is marked with ";
+        rlutil::setColor(rlutil::LIGHTGREEN);
+        std::cout<<"<<";
+        rlutil::setColor(rlutil::WHITE);
+    }
+    else {
+        std::cout<<"\nApples left to collect: " << applesLeft;
+    }
 
     // aici marchez iesirea din labirint
     const int objectsRemained = (int) objects.size();
@@ -371,7 +427,7 @@ void Game::handleEvent(bool &renderFlag) {
             break;
         }
 
-        case 102: { // f
+        case 'f': { // f
             if (m_player.getHasBomb()) { // jucatorul vrea sa foloseasca bomba
                 m_maze.createHole(crtRow, crtCol);
                 m_player.setHasBomb(false);
@@ -380,7 +436,7 @@ void Game::handleEvent(bool &renderFlag) {
             renderFlag = true;
             break;
         }
-        case 119: { // w
+        case 'w': { // w
             if (m_maze.isPositionAvailable(crtRow - 1, crtCol)) {
                 m_player = std::make_pair(crtRow - 1, crtCol);
             }
@@ -388,7 +444,7 @@ void Game::handleEvent(bool &renderFlag) {
             renderFlag = true;
             break;
         }
-        case 97: { // a
+        case 'a': { // a
             if (m_maze.isPositionAvailable(crtRow, crtCol - 1)) {
                 m_player = std::make_pair(crtRow, crtCol - 1);
             }
@@ -396,7 +452,7 @@ void Game::handleEvent(bool &renderFlag) {
             renderFlag = true;
             break;
         }
-        case 115: { // s
+        case 's': { // s
             if (m_maze.isPositionAvailable(crtRow + 1, crtCol)) {
                 m_player = std::make_pair(crtRow + 1, crtCol);
             }
@@ -404,7 +460,7 @@ void Game::handleEvent(bool &renderFlag) {
             renderFlag = true;
             break;
         }
-        case 100: { // d
+        case 'd': { // d
             if (m_maze.isPositionAvailable(crtRow, crtCol + 1)) {
                 m_player = std::make_pair(crtRow, crtCol + 1);
             }
@@ -412,7 +468,7 @@ void Game::handleEvent(bool &renderFlag) {
             renderFlag = true;
             break;
         }
-        case 113: { // q - exit
+        case 'q': { // q - exit
             m_isRunning = false;
             break;
         }
@@ -435,7 +491,7 @@ int main() {
     if (dim_maze < 10) {
         dim_maze = 10;
     }
-    if (dim_maze > 30) {
+    else if (dim_maze > 30) {
         dim_maze = 30;
     }
 
