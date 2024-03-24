@@ -10,7 +10,7 @@
 class Object {
 public:
     Object(const int row, const int col, const int color = rlutil::LIGHTRED) : m_crtRow(row), m_crtCol(col), m_color(color) {};
-    Object(const Object& obj);
+    Object(const Object& obj) = default;
     ~Object() = default;
 
     Object& operator=(const Object &obj) = default;
@@ -22,12 +22,6 @@ private:
     int m_crtRow, m_crtCol; // coordonatele obiectului
     int m_color; // culoarea obiectului
 };
-
-Object::Object(const Object& obj) {
-    this->m_crtRow = obj.m_crtRow;
-    this->m_crtCol = obj.m_crtCol;
-    this->m_color = obj.m_color;
-}
 
 std::ostream &operator<<(std::ostream &out, const Object &object) {
     rlutil::setColor(object.m_color);
@@ -57,8 +51,7 @@ std::pair<int, int> Object::getPosition() {
 
 class Maze {
 public:
-    explicit Maze(const int dim) : m_maze(std::vector<std::vector<char>>(dim, std::vector<char>(dim, '#'))),
-                                    m_dim(dim) {};
+    Maze(const int dim) : m_maze(std::vector<std::vector<char>>(dim, std::vector<char>(dim, '#'))), m_dim(dim) {};
     Maze(const Maze &maze) = default;
     ~Maze() = default;
 
