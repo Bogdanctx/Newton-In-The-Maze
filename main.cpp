@@ -1,4 +1,4 @@
-#include <iostream>
+l#include <iostream>
 #include <vector>
 #include <unordered_set>
 #include <chrono>
@@ -51,7 +51,7 @@ std::pair<int, int> Object::getPosition() {
 
 class Maze {
 public:
-    Maze(const int dim) : m_maze(std::vector<std::vector<char>>(dim, std::vector<char>(dim, '#'))), m_dim(dim) {};
+    explicit Maze(const int dim) : m_maze(std::vector<std::vector<char>>(dim, std::vector<char>(dim, '#'))), m_dim(dim) {};
     Maze(const Maze &maze) = default;
     ~Maze() = default;
 
