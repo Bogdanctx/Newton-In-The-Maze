@@ -30,7 +30,7 @@ Object::Object(const Object& obj) {
 }
 
 Object::~Object() {
-    std::cout<<"Obiect distrus\n";
+    std::cout<<"Destr Object"<<std::endl;
 }
 
 Object &Object::operator=(const Object &obj) { // NOLINT(*-use-equals-default)
@@ -94,7 +94,7 @@ std::ostream &operator<<(std::ostream &out, const Maze &maze) {
         for (const auto &j: i) {
             out << j;
         }
-        out << '\n';
+        out << std::endl;
     }
     return out;
 }
@@ -190,6 +190,9 @@ class Player {
 public:
     Player() : m_crtRow(0), m_crtCol(0), m_hasBomb(false) {};
 
+    [[maybe_unused]] Player(const Player &player);
+    ~Player();
+
     Player& operator=(std::pair<int, int> pos); // op=
     friend std::ostream &operator<<(std::ostream &out, const Player &player);
 
@@ -202,6 +205,16 @@ private:
     int m_crtRow, m_crtCol; // pozitia curenta a jucatorului
     bool m_hasBomb;
 };
+
+Player::~Player() {
+    std::cout<<"Destr Player"<<std::endl;
+}
+
+[[maybe_unused]] Player::Player(const Player &player) {
+    this->m_crtRow = player.m_crtRow;
+    this->m_crtCol = player.m_crtCol;
+    this->m_hasBomb = player.m_hasBomb;
+}
 
 Player &Player::operator=(const std::pair<int, int> pos) {
     m_crtRow = pos.first;
@@ -347,10 +360,10 @@ void Game::run() {
     rlutil::cls();
 
     if(objects.empty() && !timeExpired) {
-        std::cout << "Newton found his apples. Now he will study the laws of gravity.\n";
+        std::cout << "Newton found his apples. Now he will study the laws of gravity."<<std::endl;
     }
     else {
-        std::cout << "Newton couldn't find its apples.\n";
+        std::cout << "Newton couldn't find its apples."<<std::endl;
     }
 }
 
@@ -362,18 +375,18 @@ void Game::render() {
     const std::chrono::system_clock::time_point currentTime = std::chrono::system_clock::now();
     const int minutesPassed = (int) std::chrono::duration_cast<std::chrono::minutes>(currentTime - gameStarted).count();
 
-    std::cout<<"\nTime remaining: " << m_totalTime - minutesPassed << " minutes left.";
+    std::cout<<std::endl<<"Time remaining: " << m_totalTime - minutesPassed << " minutes left.";
 
     const int applesLeft = (int) objects.size();
 
     if(applesLeft == 0) {
-        std::cout<<"\nYou've collected all the apples! The exit is marked with ";
+        std::cout<<std::endl<<"You've collected all the apples! The exit is marked with ";
         rlutil::setColor(rlutil::LIGHTGREEN);
         std::cout<<"<<";
         rlutil::setColor(rlutil::WHITE);
     }
     else {
-        std::cout<<"\nApples left to collect: " << applesLeft;
+        std::cout<<std::endl<<"Apples left to collect: " << applesLeft;
     }
 
     // aici marchez iesirea din labirint
