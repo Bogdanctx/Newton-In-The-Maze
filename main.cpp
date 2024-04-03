@@ -10,10 +10,10 @@
 class Object {
 public:
     Object(const int row, const int col, const int color = rlutil::LIGHTRED) : m_crtRow(row), m_crtCol(col), m_color(color) {};
-    Object(const Object& obj);
-    ~Object() = default;
+    Object(const Object& obj); // cc
+    ~Object(); // destr
 
-    Object& operator=(const Object &obj) = default;
+    Object& operator=(const Object &obj); // operator=
     friend std::ostream &operator<<(std::ostream &out, const Object &object);
 
     std::pair<int, int> getPosition();
@@ -27,6 +27,20 @@ Object::Object(const Object& obj) {
     this->m_crtRow = obj.m_crtRow;
     this->m_crtCol = obj.m_crtCol;
     this->m_color = obj.m_color;
+}
+
+Object::~Object() {
+    std::cout<<"Obiect distrus\n";
+}
+
+Object &Object::operator=(const Object &obj) { // NOLINT(*-use-equals-default)
+    // suppress-ul este pentru ca op= ar trebui declarat cu = default
+
+    this->m_crtCol = obj.m_crtCol;
+    this->m_crtRow = obj.m_crtRow;
+    this->m_color = obj.m_color;
+
+    return *this;
 }
 
 std::ostream &operator<<(std::ostream &out, const Object &object) {
@@ -59,10 +73,7 @@ class Maze {
 public:
     explicit Maze(const int dim) : m_maze(std::vector<std::vector<char>>(dim, std::vector<char>(dim, '#'))),
                                     m_dim(dim) {};
-    Maze(const Maze &maze) = default;
-    ~Maze() = default;
 
-    Maze& operator=(const Maze &maze) = default;
     friend std::ostream &operator<<(std::ostream &out, const Maze &maze);
 
     bool isPositionAvailable(int row, int col); // verifica daca o noua pozitie este buna
@@ -178,10 +189,8 @@ void Maze::generate() { // Pentru generarea labirintului a fost folosit algoritm
 class Player {
 public:
     Player() : m_crtRow(0), m_crtCol(0), m_hasBomb(false) {};
-    ~Player() = default;
-    Player(const Player &player) = default;
 
-    Player& operator=(std::pair<int, int> pos);
+    Player& operator=(std::pair<int, int> pos); // op=
     friend std::ostream &operator<<(std::ostream &out, const Player &player);
 
 
@@ -240,8 +249,6 @@ class Game {
 public:
     explicit Game(const int maze_size) : m_maze(maze_size), bomb{0, effolkronium::random_static::get(2, maze_size - 1), rlutil::CYAN},
                                           m_mazeSize(maze_size), m_isRunning(true), m_toggleRender(true) {};
-    ~Game() = default;
-    Game(const Game &game) = default;
 
     void run();
 
@@ -258,9 +265,9 @@ private:
     std::chrono::system_clock::time_point lastRender;
 
     int m_totalTime{}; // timpul total alocat jocului
-    const int m_mazeSize;
-    bool m_isRunning; // flag pentru a mentine rularea jocului
-    bool m_toggleRender; // flag ca sa fac render doar atunci cand s-a intamplat ceva
+    int m_mazeSize{};
+    bool m_isRunning{}; // flag pentru a mentine rularea jocului
+    bool m_toggleRender{}; // flag ca sa fac render doar atunci cand s-a intamplat ceva
 };
 
 void Game::run() {
@@ -427,7 +434,7 @@ void Game::handleEvent(bool &renderFlag) {
             break;
         }
 
-        case 'f': { // f
+        case 'f': {
             if (m_player.getHasBomb()) { // jucatorul vrea sa foloseasca bomba
                 m_maze.createHole(crtRow, crtCol);
                 m_player.setHasBomb(false);
@@ -436,7 +443,7 @@ void Game::handleEvent(bool &renderFlag) {
             renderFlag = true;
             break;
         }
-        case 'w': { // w
+        case 'w': {
             if (m_maze.isPositionAvailable(crtRow - 1, crtCol)) {
                 m_player = std::make_pair(crtRow - 1, crtCol);
             }
@@ -444,7 +451,7 @@ void Game::handleEvent(bool &renderFlag) {
             renderFlag = true;
             break;
         }
-        case 'a': { // a
+        case 'a': {
             if (m_maze.isPositionAvailable(crtRow, crtCol - 1)) {
                 m_player = std::make_pair(crtRow, crtCol - 1);
             }
@@ -452,7 +459,7 @@ void Game::handleEvent(bool &renderFlag) {
             renderFlag = true;
             break;
         }
-        case 's': { // s
+        case 's': {
             if (m_maze.isPositionAvailable(crtRow + 1, crtCol)) {
                 m_player = std::make_pair(crtRow + 1, crtCol);
             }
@@ -460,7 +467,7 @@ void Game::handleEvent(bool &renderFlag) {
             renderFlag = true;
             break;
         }
-        case 'd': { // d
+        case 'd': {
             if (m_maze.isPositionAvailable(crtRow, crtCol + 1)) {
                 m_player = std::make_pair(crtRow, crtCol + 1);
             }
@@ -468,7 +475,7 @@ void Game::handleEvent(bool &renderFlag) {
             renderFlag = true;
             break;
         }
-        case 'q': { // q - exit
+        case 'q': { // exit
             m_isRunning = false;
             break;
         }

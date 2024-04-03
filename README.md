@@ -8,6 +8,7 @@ te duci spre ieșirea din labirint (va fi marcată cu verde în momentul în car
 o detonezi la poziția la care te afli (ce va fi în jurul caracterului va fi distrus). Poți lua o bombă chiar dacă nu ai nevoie de ea. Atunci
 când iei o bombă se va genera alta nouă peste 5 secunde (bomba se păstrează chiar dacă a fost una nouă generată).  
 
+Se recomandă consola să fie pe modul fullscreen.
 
 ### Dimensiunea labirintului
 Inițial programul cere un numar care reprezintă dimensiunea labirintului. Acesta poate fi cuprins între 10 sau 30 din cauza limitărilor
