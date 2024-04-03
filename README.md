@@ -1,6 +1,10 @@
 # Newton In The Maze
 Un hoț i-a furat merele lui Newton și le-a ascuns într-un labirint. Rolul tău este să-l ajuți pe Newton să-și recupereze merele.
 
+### Preview
+
+![Alt Text](https://s12.gifyu.com/images/SVYpT.gif)
+
 ### Cum se joacă?
 Personajul pe care îl poți controla este marcat cu litera T. Trebuie să colectezi obiectele marcate cu roșu (merele) și după să 
 te duci spre ieșirea din labirint (va fi marcată cu verde în momentul în care toate merele au fost adunate). Uneori hoțul a pus merele
