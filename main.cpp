@@ -99,7 +99,7 @@ bool Maze::isInside(const int row, const int col) const {
 }
 
 void Maze::createHole(const int row, const int col) { // cand a fost bomba folosita se distrug cei 8 vecini din jurul jucatorului
-    // drdc = cei 8 vecini ai punctului (row, col)
+    // drdc = vector de directii (cei 8 vecini ai punctului (row, col))
     const int drdc[8][2] = {{-1, -1}, // (row-1, col-1)
                             {-1, 0}, // (row-1, col)
                             {-1, 1}, // (row-1, col+1)
